@@ -208,6 +208,10 @@
     <role_privilege  role="Base Role" privilege="Edit Patient Programs"/>
     <role_privilege  role="Base Role" privilege="Get Programs"/>
     <role_privilege  role="Base Role" privilege="Task: coreapps.enrollInProgram"/>
+    <role_privilege  role="Base Role" privilege="Edit Diagnoses"/>
+    <role_privilege  role="Base Role" privilege="Get Diagnoses"/>
+    <role_privilege  role="Base Role" privilege="Delete Diagnoses"/>
+    <role_privilege  role="Base Role"  privilege="Add Visits"/>
 
     <!--***** PERSON/LOCATION CENTERED ROLES *****-->
 
@@ -217,10 +221,9 @@
 
     <!-- role privilege -->
     <role_privilege  role="Reception"  privilege="App: ugandaemrpoc.findPatient"/>
-    <role_privilege  role="Reception"  privilege="Add Visits"/>
-    <role_privilege  role="Data Clerk"  privilege="App: fingerprint.addPatientFingerprint"/>
-    <role_privilege  role="Data Clerk"  privilege="App: fingerprint.fingerprintDetails"/>
-    <role_privilege  role="Data Clerk"  privilege="App: fingerprint.statistic"/>
+    <role_privilege  role="Reception"  privilege="App: fingerprint.addPatientFingerprint"/>
+    <role_privilege  role="Reception"  privilege="App: fingerprint.fingerprintDetails"/>
+    <role_privilege  role="Reception"  privilege="App: fingerprint.statistic"/>
 
 
     <!--* TRIAGE ROLE *-->
@@ -445,8 +448,7 @@
     <role_role  parent_role="Base Role"  child_role="Data Clerk"/>
 
     <!-- role privilege -->
-    <role_privilege  role="Reception"  privilege="App: ugandaemrpoc.findPatient"/>
-    <role_privilege  role="Reception"  privilege="Add Visits"/>
+    <role_privilege  role="Data Clerk"  privilege="App: ugandaemrpoc.findPatient"/>
     <role_privilege  role="Data Clerk"  privilege="Task: HIV Clinic Access"/>
     <role_privilege  role="Data Clerk"  privilege="App: ugandaemr.widget.lastARTVisitSummary"/>
     <role_privilege  role="Data Clerk"  privilege="App: ugandaemr.widget.artStatus"/>
@@ -467,6 +469,5 @@
     <role_privilege  role="Data Clerk"  privilege="App: fingerprint.addPatientFingerprint"/>
     <role_privilege  role="Data Clerk"  privilege="App: fingerprint.fingerprintDetails"/>
     <role_privilege  role="Data Clerk"  privilege="App: fingerprint.statistic"/>
-
 
 </dataset>
