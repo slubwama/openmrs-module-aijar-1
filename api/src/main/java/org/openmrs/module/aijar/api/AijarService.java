@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
@@ -72,7 +74,6 @@ public interface AijarService extends OpenmrsService {
 	 */
 	public void stopActiveOutPatientVisits();
 
-
     /**
      * Gets transfer out encounters map.
      * @param patient the patient whose transfer out encounters are being queried
@@ -110,4 +111,5 @@ public interface AijarService extends OpenmrsService {
      * @return Map
      */
     public List<Encounter> getTransferHistory(Patient patient);
+
 }
