@@ -191,6 +191,7 @@
     <privilege  privilege="App: ugandaemrreports.UgandaEMRReports2014HMISTools"  description="UgandaEMR Reports 2014 HMIS Tools report access privillege"  uuid="ef0e24a2-b40b-425f-b514-4c929ebd7e9c"/>
     <privilege  privilege="App: ugandaemrreports.UgandaEMRReports2019HMISTools"  description="UgandaEMR Reports 2019 HMIS Tools report access privillege"  uuid="b5e71c75-d0fa-4f42-9f37-1bdf9285d72e"/>
     <privilege  privilege="App: ugandaemrreports.viralLoadSupression"  description="Viral Load Supression report access privillege"  uuid="9fb9c77a-e7c4-477a-9439-90556218c1d5"/>
+
     <privilege  privilege="App: ugandaemrpoc.artclinic"  description="Access to the HIV clinic provider dashboard"  uuid="93e8e3ba-775d-4a05-b547-bf67ab0f42e8"/>
     <privilege  privilege="App: ugandaemrpoc.laboratory"  description="Access to the laboratory dashboard"  uuid="0adadcd3-43b3-4cb6-9a81-39f7e6240846"/>
     <privilege  privilege="App: ugandaemrpoc.outpatient"  description="Access to the OPD clinic provider dashboard"  uuid="27c729b9-1426-436b-8c37-976a29c6f28d"/>
