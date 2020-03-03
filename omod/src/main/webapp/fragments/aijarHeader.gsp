@@ -72,14 +72,14 @@
 
         <% if (enableUserAccountExt) { %>
         jq('.identifier').hover(
-                function () {
-                    jq('.appui-toggle').show();
-                    jq('.appui-icon-caret-down').hide();
-                },
-                function () {
-                    jq('.appui-toggle').hide();
-                    jq('.appui-icon-caret-down').show();
-                }
+            function () {
+                jq('.appui-toggle').show();
+                jq('.appui-icon-caret-down').hide();
+            },
+            function () {
+                jq('.appui-toggle').hide();
+                jq('.appui-icon-caret-down').show();
+            }
         );
         jq('.identifier').css('cursor', 'pointer');
         <% } %>
@@ -87,26 +87,23 @@
     });
 
 </script>
-<header class="header" >
-
+<header class="header">
     <div class="row">
         <div class="col-sm-4">
             <div class="row">
                 <div class="headerimage col-sm-2">
-                    <a href="${logoLinkUrl}">
-                        <img src="${logoIconUrl}"  class="logoimage"/>
-                    </a>
+                    <a href="${logoLinkUrl}"><img src="${logoIconUrl}" class="logoimage"/></a>
                 </div>
-                <div  class="headerelements col-sm-9">
+
+                <div class="headerelements col-sm-8">
                     <div style="padding-bottom: 10px;font-weight: bold;font-family: Trebuchet MS;">
                         <span id="headertittle">U</span>GANDA</span><span id="headertittle">EMR</span>
                     </div>
                     <span id="headersubtittle">Electronic Medical Records System</span>
                 </div>
             </div>
-
-
         </div>
+
         <div class="col-sm-3">
             <div class="healthcentrename">
                 ${healthCenter}
@@ -164,6 +161,5 @@
             </div>
             <% } %>
         </div>
-
     </div>
 </header>
