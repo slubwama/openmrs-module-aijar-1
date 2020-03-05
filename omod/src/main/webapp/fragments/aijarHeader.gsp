@@ -72,14 +72,14 @@
 
         <% if (enableUserAccountExt) { %>
         jq('.identifier').hover(
-            function () {
-                jq('.appui-toggle').show();
-                jq('.appui-icon-caret-down').hide();
-            },
-            function () {
-                jq('.appui-toggle').hide();
-                jq('.appui-icon-caret-down').show();
-            }
+                function () {
+                    jq('.appui-toggle').show();
+                    jq('.appui-icon-caret-down').hide();
+                },
+                function () {
+                    jq('.appui-toggle').hide();
+                    jq('.appui-icon-caret-down').show();
+                }
         );
         jq('.identifier').css('cursor', 'pointer');
         <% } %>
