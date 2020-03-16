@@ -60,6 +60,9 @@ public class CommonMetadataBundle extends AbstractMetadataBundle {
         install(EncounterTypes.APPOINTMENT_FOLLOW_UP);
         install(EncounterTypes.TRIAGE);
         install(EncounterTypes.MEDICATION_DISPENSE);
+        install(EncounterTypes.MISSED_APPOINTMENT_TRACKING);
+        install(EncounterTypes.TRANSFER_IN);
+        install(EncounterTypes.TRANSFER_OUT);
 
         //installing programs metadata
         log.info("Installing Programs");
