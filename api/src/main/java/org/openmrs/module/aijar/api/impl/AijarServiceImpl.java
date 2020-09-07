@@ -67,289 +67,291 @@ import static org.openmrs.module.aijar.metadata.core.EncounterTypes.TRANSFER_OUT
  */
 public class AijarServiceImpl extends BaseOpenmrsService implements AijarService {
 
-	protected final Log log = LogFactory.getLog(this.getClass());
+    protected final Log log = LogFactory.getLog(this.getClass());
 
-	private AijarDAO dao;
+    private AijarDAO dao;
 
-	@Autowired
-	private PatientService patientService;
+    @Autowired
+    private PatientService patientService;
 
-	@Autowired
-	private PersonService personService;
+    @Autowired
+    private PersonService personService;
 
-	/**
-	 * @param dao the dao to set
-	 */
-	public void setDao(AijarDAO dao) {
-		this.dao = dao;
-	}
+    /**
+     * @param dao the dao to set
+     */
+    public void setDao(AijarDAO dao) {
+        this.dao = dao;
+    }
 
-	/**
-	 * @return the dao
-	 */
-	public AijarDAO getDao() {
-		return dao;
-	}
+    /**
+     * @return the dao
+     */
+    public AijarDAO getDao() {
+        return dao;
+    }
 
-	@Override
-	public void linkExposedInfantToMotherViaARTNumber(Person infant, String motherARTNumber) {
-		log.debug("Linking infant with ID " + infant.getPersonId() + " to mother with ART Number " + motherARTNumber);
-		List<PatientIdentifierType> artNumberPatientidentifierTypes = new ArrayList<>();
-		artNumberPatientidentifierTypes.add(Context.getPatientService().getPatientIdentifierTypeByUuid(PatientIdentifierTypes.ART_PATIENT_NUMBER.uuid()));
-		artNumberPatientidentifierTypes.add(Context.getPatientService().getPatientIdentifierTypeByUuid(PatientIdentifierTypes.HIV_CARE_NUMBER.uuid()));
-		// find the mother by identifier
-		List<Patient> mothers = patientService.getPatients(null, // name of the person
-				motherARTNumber, //mother ART number
-				artNumberPatientidentifierTypes, // ART Number and HIV Clinic number
-				true); // match Identifier exactly
-		if (mothers.size() != 0) {
-			Person potentialMother = mothers.get(0).getPerson();
-			// mothers have to be female and above 12 years of age
-			if (potentialMother.getAge() != null && potentialMother.getAge() > 12 & potentialMother.getGender().equals("F")) {
-				Relationship relationship = new Relationship();
-				relationship.setRelationshipType(personService.getRelationshipTypeByUuid("8d91a210-c2cc-11de-8d13-0010c6dffd0f"));
-				relationship.setPersonA(potentialMother);
-				relationship.setPersonB(infant);
-				personService.saveRelationship(relationship);
-				log.debug("Infant with ID " + infant.getPersonId() + " linked to mother with ID " + potentialMother.getPersonId());
-			}
-		}
-	}
+    @Override
+    public void linkExposedInfantToMotherViaARTNumber(Person infant, String motherARTNumber) {
+        log.debug("Linking infant with ID " + infant.getPersonId() + " to mother with ART Number " + motherARTNumber);
+        List<PatientIdentifierType> artNumberPatientidentifierTypes = new ArrayList<>();
+        artNumberPatientidentifierTypes.add(Context.getPatientService().getPatientIdentifierTypeByUuid(PatientIdentifierTypes.ART_PATIENT_NUMBER.uuid()));
+        artNumberPatientidentifierTypes.add(Context.getPatientService().getPatientIdentifierTypeByUuid(PatientIdentifierTypes.HIV_CARE_NUMBER.uuid()));
+        // find the mother by identifier
+        List<Patient> mothers = patientService.getPatients(null, // name of the person
+                motherARTNumber, //mother ART number
+                artNumberPatientidentifierTypes, // ART Number and HIV Clinic number
+                true); // match Identifier exactly
+        if (mothers.size() != 0) {
+            Person potentialMother = mothers.get(0).getPerson();
+            // mothers have to be female and above 12 years of age
+            if (potentialMother.getAge() != null && potentialMother.getAge() > 12 & potentialMother.getGender().equals("F")) {
+                Relationship relationship = new Relationship();
+                relationship.setRelationshipType(personService.getRelationshipTypeByUuid("8d91a210-c2cc-11de-8d13-0010c6dffd0f"));
+                relationship.setPersonA(potentialMother);
+                relationship.setPersonB(infant);
+                personService.saveRelationship(relationship);
+                log.debug("Infant with ID " + infant.getPersonId() + " linked to mother with ID " + potentialMother.getPersonId());
+            }
+        }
+    }
 
-	@Override
-	public void linkExposedInfantToMotherViaARTNumber(Patient infant, String motherARTNumber) {
-		linkExposedInfantToMotherViaARTNumber(infant.getPerson(), motherARTNumber);
-	}
+    @Override
+    public void linkExposedInfantToMotherViaARTNumber(Patient infant, String motherARTNumber) {
+        linkExposedInfantToMotherViaARTNumber(infant.getPerson(), motherARTNumber);
+    }
 
-	public void setAlertForAllUsers(String alertMessage) {
-		List<User> userList = Context.getUserService().getAllUsers();
-		Alert alert = new Alert();
-		for (User user : userList) {
-			alert.addRecipient(user);
-		}
-		alert.setText(alertMessage);
-		Context.getAlertService().saveAlert(alert);
-	}
+    public void setAlertForAllUsers(String alertMessage) {
+        List<User> userList = Context.getUserService().getAllUsers();
+        Alert alert = new Alert();
+        for (User user : userList) {
+            alert.addRecipient(user);
+        }
+        alert.setText(alertMessage);
+        Context.getAlertService().saveAlert(alert);
+    }
 
-	/**
-	 * @see org.openmrs.module.aijar.api.AijarService#generatePatientUIC(org.openmrs.Patient)
-	 */
-	@Override
-	public String generatePatientUIC(Patient patient) {
-		String familyNameCode = "";
-		String givenNameCode = "";
-		String middleNameCode = "";
-		String countryCode = "";
-		String genderCode = "";
-		Date dob = patient.getBirthdate();
+    /**
+     * @see org.openmrs.module.aijar.api.AijarService#generatePatientUIC(org.openmrs.Patient)
+     */
+    @Override
+    public String generatePatientUIC(Patient patient) {
+        String familyNameCode = "";
+        String givenNameCode = "";
+        String middleNameCode = "";
+        String countryCode = "";
+        String genderCode = "";
+        Date dob = patient.getBirthdate();
 
-		if (dob == null) {
-			return null;
-		}
+        if (dob == null) {
+            return null;
+        }
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(dob);
-		String monthCode = "";
-		String year = (cal.get(Calendar.YEAR) + "").substring(2, 4);
-
-
-		if (cal.get(Calendar.MONTH) <= 8) {
-			monthCode = "0" + (cal.get(Calendar.MONTH)+1);
-		} else {
-			monthCode = "" + (cal.get(Calendar.MONTH)+1);
-		}
-
-		if (patient.getGender().equals("F")) {
-			genderCode = "2";
-		} else {
-			genderCode = "1";
-		}
-
-		if (patient.getPerson().getPersonAddress() != null && !patient.getPerson().getPersonAddress().getCountry().isEmpty()) {
-			countryCode = patient.getPerson().getPersonAddress().getCountry().substring(0, 1);
-		} else {
-			countryCode = "X";
-		}
-
-		if (patient.getFamilyName()!=null&&!patient.getFamilyName().isEmpty()) {
-			String firstLetter = replaceLettersWithNumber(patient.getFamilyName().substring(0, 1));
-			String secondLetter = replaceLettersWithNumber(patient.getFamilyName().substring(1, 2));
-			String thirdLetter = replaceLettersWithNumber(patient.getFamilyName().substring(2, 3));
-			familyNameCode = firstLetter + secondLetter + thirdLetter;
-		} else {
-			familyNameCode = "X";
-		}
-
-		if (patient.getGivenName()!=null&& !patient.getGivenName().isEmpty()) {
-			String firstLetter = replaceLettersWithNumber(patient.getGivenName().substring(0, 1));
-			String secondLetter = replaceLettersWithNumber(patient.getGivenName().substring(1, 2));
-			String thirdLetter = replaceLettersWithNumber(patient.getGivenName().substring(2, 3));
-			givenNameCode = firstLetter + secondLetter + thirdLetter;
-		} else {
-			givenNameCode = "X";
-		}
-
-		if (patient.getMiddleName()!=null&&!patient.getMiddleName().isEmpty()) {
-			middleNameCode = replaceLettersWithNumber(patient.getMiddleName().substring(0, 1));
-		} else {
-			middleNameCode = "X";
-		}
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dob);
+        String monthCode = "";
+        String year = (cal.get(Calendar.YEAR) + "").substring(2, 4);
 
 
-		return countryCode + "-" + monthCode + year + "-" + genderCode + "-" + givenNameCode + familyNameCode + middleNameCode;
-	}
+        if (cal.get(Calendar.MONTH) <= 8) {
+            monthCode = "0" + (cal.get(Calendar.MONTH) + 1);
+        } else {
+            monthCode = "" + (cal.get(Calendar.MONTH) + 1);
+        }
 
-	/**
-	 * @see org.openmrs.module.aijar.api.AijarService#generateAndSaveUICForPatientsWithOut()
-	 */
-	@Override
-	public void generateAndSaveUICForPatientsWithOut() {
-		PatientService patientService = Context.getPatientService();
-		List list = Context.getAdministrationService().executeSQL("select patient.patient_id from patient where patient_id NOT IN(select patient.patient_id from patient inner join patient_identifier pi on (patient.patient_id = pi.patient_id)  inner join patient_identifier_type pit on (pi.identifier_type = pit.patient_identifier_type_id) where pit.uuid='877169c4-92c6-4cc9-bf45-1ab95faea242')", true);
-		PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierTypeByUuid("877169c4-92c6-4cc9-bf45-1ab95faea242");
-		for (Object object : list) {
-			Integer patientId = (Integer) ((ArrayList) object).get(0);
-			Patient patient = patientService.getPatient(patientId);
+        if (patient.getGender().equals("F")) {
+            genderCode = "2";
+        } else {
+            genderCode = "1";
+        }
 
-			String uniqueIdentifierCode = generatePatientUIC(patient);
+        if (patient.getPerson().getPersonAddress() != null && !patient.getPerson().getPersonAddress().getCountry().isEmpty()) {
+            countryCode = patient.getPerson().getPersonAddress().getCountry().substring(0, 1);
+        } else {
+            countryCode = "X";
+        }
 
-			if (uniqueIdentifierCode != null) {
-				PatientIdentifier patientIdentifier = new PatientIdentifier();
-				patientIdentifier.setIdentifier(uniqueIdentifierCode);
-				patientIdentifier.setIdentifierType(patientIdentifierType);
-				patientIdentifier.setLocation(Context.getLocationService().getLocationByUuid(Locations.PARENT.uuid()));
-				patientIdentifier.setCreator(Context.getUserService().getUser(1));
-				patientIdentifier.setPreferred(false);
-				patientIdentifier.setDateCreated(new Date());
-				patientIdentifier.setPatient(patient);
-				try {
-					patientService.savePatientIdentifier(patientIdentifier);
-				}catch (Exception e){
-					log.error("Failed to Save UIC for patient #"+patient.getPatientId(),e);
-				}
+        if (patient.getFamilyName() != null && !patient.getFamilyName().isEmpty()) {
+            String firstLetter = replaceLettersWithNumber(patient.getFamilyName().substring(0, 1));
+            String secondLetter = replaceLettersWithNumber(patient.getFamilyName().substring(1, 2));
+            String thirdLetter = replaceLettersWithNumber(patient.getFamilyName().substring(2, 3));
+            familyNameCode = firstLetter + secondLetter + thirdLetter;
+        } else {
+            familyNameCode = "X";
+        }
 
-			}
-		}
-	}
+        if (patient.getGivenName() != null && !patient.getGivenName().isEmpty()) {
+            String firstLetter = replaceLettersWithNumber(patient.getGivenName().substring(0, 1));
+            String secondLetter = replaceLettersWithNumber(patient.getGivenName().substring(1, 2));
+            String thirdLetter = replaceLettersWithNumber(patient.getGivenName().substring(2, 3));
+            givenNameCode = firstLetter + secondLetter + thirdLetter;
+        } else {
+            givenNameCode = "X";
+        }
 
-	/**
-	 * This Method replaces letters with number position in the alphabet
-	 * @param letter the alphabetical letter
-	 * @return number that matches the alphabetical letter position
-	 */
-	private String replaceLettersWithNumber(String letter) {
-		String numberToReturn = "X";
+        if (patient.getMiddleName() != null && !patient.getMiddleName().isEmpty()) {
+            middleNameCode = replaceLettersWithNumber(patient.getMiddleName().substring(0, 1));
+        } else {
+            middleNameCode = "X";
+        }
 
-		switch (letter.toUpperCase()) {
-			case "A":
-				numberToReturn = "01";
-				break;
-			case "B":
-				numberToReturn = "02";
-				break;
-			case "C":
-				numberToReturn = "03";
-				break;
-			case "D":
-				numberToReturn = "04";
-				break;
-			case "E":
-				numberToReturn = "05";
-				break;
-			case "F":
-				numberToReturn = "06";
-				break;
-			case "G":
-				numberToReturn = "07";
-				break;
-			case "H":
-				numberToReturn = "08";
-				break;
-			case "I":
-				numberToReturn = "09";
-				break;
-			case "J":
-				numberToReturn = "10";
-				break;
-			case "K":
-				numberToReturn = "11";
-				break;
-			case "L":
-				numberToReturn = "12";
-				break;
-			case "M":
-				numberToReturn = "13";
-				break;
-			case "N":
-				numberToReturn = "14";
-				break;
-			case "O":
-				numberToReturn = "15";
-				break;
-			case "P":
-				numberToReturn = "16";
-				break;
-			case "Q":
-				numberToReturn = "17";
-				break;
-			case "R":
-				numberToReturn = "18";
-				break;
-			case "S":
-				numberToReturn = "19";
-				break;
-			case "T":
-				numberToReturn = "20";
-				break;
-			case "U":
-				numberToReturn = "21";
-				break;
-			case "V":
-				numberToReturn = "22";
-				break;
-			case "W":
-				numberToReturn = "23";
-				break;
-			case "X":
-				numberToReturn = "24";
-				break;
-			case "Y":
-				numberToReturn = "25";
-				break;
-			case "Z":
-				numberToReturn = "26";
-				break;
 
-			default:
-				numberToReturn = "X";
-		}
-		return numberToReturn;
-	}
-	/**
-	 * @see org.openmrs.module.aijar.api.AijarService#stopActiveOutPatientVisits()
-	 */
-	public void stopActiveOutPatientVisits() {
+        return countryCode + "-" + monthCode + year + "-" + genderCode + "-" + givenNameCode + familyNameCode + middleNameCode;
+    }
 
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    /**
+     * @see org.openmrs.module.aijar.api.AijarService#generateAndSaveUICForPatientsWithOut()
+     */
+    @Override
+    public void generateAndSaveUICForPatientsWithOut() {
+        PatientService patientService = Context.getPatientService();
+        List list = Context.getAdministrationService().executeSQL("select patient.patient_id from patient where patient_id NOT IN(select patient.patient_id from patient inner join patient_identifier pi on (patient.patient_id = pi.patient_id)  inner join patient_identifier_type pit on (pi.identifier_type = pit.patient_identifier_type_id) where pit.uuid='877169c4-92c6-4cc9-bf45-1ab95faea242')", true);
+        PatientIdentifierType patientIdentifierType = patientService.getPatientIdentifierTypeByUuid("877169c4-92c6-4cc9-bf45-1ab95faea242");
+        for (Object object : list) {
+            Integer patientId = (Integer) ((ArrayList) object).get(0);
+            Patient patient = patientService.getPatient(patientId);
 
-		SimpleDateFormat formatterExt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String uniqueIdentifierCode = generatePatientUIC(patient);
 
-		String currentDate = formatterExt.format(OpenmrsUtil.firstSecondOfDay(new Date()));
+            if (uniqueIdentifierCode != null) {
+                PatientIdentifier patientIdentifier = new PatientIdentifier();
+                patientIdentifier.setIdentifier(uniqueIdentifierCode);
+                patientIdentifier.setIdentifierType(patientIdentifierType);
+                patientIdentifier.setLocation(Context.getLocationService().getLocationByUuid(Locations.PARENT.uuid()));
+                patientIdentifier.setCreator(Context.getUserService().getUser(1));
+                patientIdentifier.setPreferred(false);
+                patientIdentifier.setDateCreated(new Date());
+                patientIdentifier.setPatient(patient);
+                try {
+                    patientService.savePatientIdentifier(patientIdentifier);
+                } catch (Exception e) {
+                    log.error("Failed to Save UIC for patient #" + patient.getPatientId(), e);
+                }
 
-		//TODO Change AdministrationService to Autowired
-		AdministrationService administrationService = Context.getAdministrationService();
+            }
+        }
+    }
 
-		String visitTypeUUID =administrationService.getGlobalProperty("ugandaemr.autoCloseVisit.visitTypeUUID");
+    /**
+     * This Method replaces letters with number position in the alphabet
+     *
+     * @param letter the alphabetical letter
+     * @return number that matches the alphabetical letter position
+     */
+    private String replaceLettersWithNumber(String letter) {
+        String numberToReturn = "X";
 
-		VisitService visitService = Context.getVisitService();
+        switch (letter.toUpperCase()) {
+            case "A":
+                numberToReturn = "01";
+                break;
+            case "B":
+                numberToReturn = "02";
+                break;
+            case "C":
+                numberToReturn = "03";
+                break;
+            case "D":
+                numberToReturn = "04";
+                break;
+            case "E":
+                numberToReturn = "05";
+                break;
+            case "F":
+                numberToReturn = "06";
+                break;
+            case "G":
+                numberToReturn = "07";
+                break;
+            case "H":
+                numberToReturn = "08";
+                break;
+            case "I":
+                numberToReturn = "09";
+                break;
+            case "J":
+                numberToReturn = "10";
+                break;
+            case "K":
+                numberToReturn = "11";
+                break;
+            case "L":
+                numberToReturn = "12";
+                break;
+            case "M":
+                numberToReturn = "13";
+                break;
+            case "N":
+                numberToReturn = "14";
+                break;
+            case "O":
+                numberToReturn = "15";
+                break;
+            case "P":
+                numberToReturn = "16";
+                break;
+            case "Q":
+                numberToReturn = "17";
+                break;
+            case "R":
+                numberToReturn = "18";
+                break;
+            case "S":
+                numberToReturn = "19";
+                break;
+            case "T":
+                numberToReturn = "20";
+                break;
+            case "U":
+                numberToReturn = "21";
+                break;
+            case "V":
+                numberToReturn = "22";
+                break;
+            case "W":
+                numberToReturn = "23";
+                break;
+            case "X":
+                numberToReturn = "24";
+                break;
+            case "Y":
+                numberToReturn = "25";
+                break;
+            case "Z":
+                numberToReturn = "26";
+                break;
 
-		List activeVisitList = null;
-		activeVisitList = administrationService.executeSQL("select visit.visit_id from visit inner join visit_type on (visit.visit_type_id = visit_type.visit_type_id)  where visit_type.uuid='"+visitTypeUUID+"' AND visit.date_stopped IS NULL AND  visit.date_started < '" + currentDate + "'", true);
+            default:
+                numberToReturn = "X";
+        }
+        return numberToReturn;
+    }
 
-		for (Object object : activeVisitList) {
-			ArrayList<Integer> integers = (ArrayList) object;
-			Visit visit = visitService.getVisit(integers.get(0));
-			try{
+    /**
+     * @see org.openmrs.module.aijar.api.AijarService#stopActiveOutPatientVisits()
+     */
+    public void stopActiveOutPatientVisits() {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+        SimpleDateFormat formatterExt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        String currentDate = formatterExt.format(OpenmrsUtil.firstSecondOfDay(new Date()));
+
+        //TODO Change AdministrationService to Autowired
+        AdministrationService administrationService = Context.getAdministrationService();
+
+        String visitTypeUUID = administrationService.getGlobalProperty("ugandaemr.autoCloseVisit.visitTypeUUID");
+
+        VisitService visitService = Context.getVisitService();
+
+        List activeVisitList = null;
+        activeVisitList = administrationService.executeSQL("select visit.visit_id from visit inner join visit_type on (visit.visit_type_id = visit_type.visit_type_id)  where visit_type.uuid='" + visitTypeUUID + "' AND visit.date_stopped IS NULL AND  visit.date_started < '" + currentDate + "'", true);
+
+        for (Object object : activeVisitList) {
+            ArrayList<Integer> integers = (ArrayList) object;
+            Visit visit = visitService.getVisit(integers.get(0));
+            try {
                 Date largestEncounterDate = OpenmrsUtil.getLastMomentOfDay(visit.getStartDatetime());
 
                 for (Encounter encounter : visit.getEncounters()) {
@@ -358,15 +360,15 @@ public class AijarServiceImpl extends BaseOpenmrsService implements AijarService
                     }
                 }
                 visitService.endVisit(visit, OpenmrsUtil.getLastMomentOfDay(largestEncounterDate));
-			}catch (Exception e){
-				log.error("Failed to auto close visit",e);
-			}
+            } catch (Exception e) {
+                log.error("Failed to auto close visit", e);
+            }
 
-		}
-	}
+        }
+    }
 
     /**
-     * @see org.openmrs.module.aijar.api.AijarService#transferredOut(org.openmrs.Patient,java.util.Date)
+     * @see org.openmrs.module.aijar.api.AijarService#transferredOut(org.openmrs.Patient, java.util.Date)
      */
     @Override
     public Map transferredOut(Patient patient, Date date) {
@@ -404,7 +406,7 @@ public class AijarServiceImpl extends BaseOpenmrsService implements AijarService
     }
 
     /**
-     * @see org.openmrs.module.aijar.api.AijarService#transferredIn(org.openmrs.Patient,java.util.Date)
+     * @see org.openmrs.module.aijar.api.AijarService#transferredIn(org.openmrs.Patient, java.util.Date)
      */
     @Override
     public Map transferredIn(Patient patient, Date date) {
@@ -450,39 +452,43 @@ public class AijarServiceImpl extends BaseOpenmrsService implements AijarService
     public List<Encounter> getTransferHistory(Patient patient) {
 
         EncounterService encounterService = Context.getEncounterService();
+        Collection<EncounterType> encounterTypes = new ArrayList<>();
+        List<Encounter> encounters = new ArrayList<>();
 
-        Collection<EncounterType> encounterTypes = encounterService.findEncounterTypes(TRANSFER_IN.name());
-        encounterTypes.addAll(encounterService.findEncounterTypes(TRANSFER_OUT.name()));
+        encounterTypes.add(encounterService.getEncounterTypeByUuid(TRANSFER_IN.uuid()));
+        encounterTypes.add(encounterService.getEncounterTypeByUuid(TRANSFER_OUT.uuid()));
 
         EncounterSearchCriteria encounterSearchCriteria = new EncounterSearchCriteriaBuilder().setPatient(patient).setIncludeVoided(false).setEncounterTypes(encounterTypes).createEncounterSearchCriteria();
 
-        List<Encounter> encounters = encounterService.getEncounters(encounterSearchCriteria);
+        if (encounterTypes.isEmpty()) {
+            encounters = encounterService.getEncounters(encounterSearchCriteria);
+        }
 
         return encounters;
-	}
-	
-	@Override
-	public List<PublicHoliday> getAllPublicHolidays() throws APIException {
-		return dao.getAllPublicHolidays();
-	}
+    }
 
-	@Override
-	public PublicHoliday getPublicHolidayByDate(Date publicHolidayDate) throws APIException {
-		return dao.getPublicHolidayByDate(publicHolidayDate);
-	}
+    @Override
+    public List<PublicHoliday> getAllPublicHolidays() throws APIException {
+        return dao.getAllPublicHolidays();
+    }
 
-	@Override
-	public PublicHoliday savePublicHoliday(PublicHoliday publicHoliday) {
-		return dao.savePublicHoliday(publicHoliday);
-	}
+    @Override
+    public PublicHoliday getPublicHolidayByDate(Date publicHolidayDate) throws APIException {
+        return dao.getPublicHolidayByDate(publicHolidayDate);
+    }
 
-	@Override
-	public PublicHoliday getPublicHolidaybyUuid(String uuid) {
-		return dao.getPublicHolidaybyUuid(uuid);
-	}
+    @Override
+    public PublicHoliday savePublicHoliday(PublicHoliday publicHoliday) {
+        return dao.savePublicHoliday(publicHoliday);
+    }
 
-	@Override
-	public List<PublicHoliday> getPublicHolidaysByDate(Date publicHolidayDate) throws APIException {
-		return dao.getPublicHolidaysByDate(publicHolidayDate);
-	}
+    @Override
+    public PublicHoliday getPublicHolidaybyUuid(String uuid) {
+        return dao.getPublicHolidaybyUuid(uuid);
+    }
+
+    @Override
+    public List<PublicHoliday> getPublicHolidaysByDate(Date publicHolidayDate) throws APIException {
+        return dao.getPublicHolidaysByDate(publicHolidayDate);
+    }
 }
